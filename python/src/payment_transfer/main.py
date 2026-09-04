@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from payment_transfer.infrastructure.database.init import initialize_database
+from payment_transfer.infrastructure.database import initialize_database
 
 app = FastAPI(
     title="Payment Transfer Challenge",
