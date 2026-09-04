@@ -1,7 +1,7 @@
 from decimal import Decimal
 from uuid import UUID
 
-from sqlalchemy import Enum, Numeric, String
+from sqlalchemy import Enum, Numeric, String, Uuid
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from payment_transfer.domain.accounts.account_type import AccountType
@@ -14,7 +14,10 @@ class Base(DeclarativeBase):
 class AccountModel(Base):
     __tablename__ = "accounts"
 
-    id: Mapped[UUID] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(
+        Uuid,
+        primary_key=True,
+    )
 
     full_name: Mapped[str] = mapped_column(
         String(150),
