@@ -1,0 +1,19 @@
+[project]
+name = "payment-transfer-challenge"
+version = "0.1.0"
+description = "Money transfer API built as part of the Programming Lab"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "httpx",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
