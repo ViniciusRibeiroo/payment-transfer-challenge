@@ -48,6 +48,15 @@ class SqlAlchemyAccountRepository:
         return to_domain(model)
 
     def save(self, account: Account) -> None:
-        model = to_model(account)
+        model = self._session.get(AccountModel, account.id)
 
-        self._session.add(model)
+        if model is None:
+            self._session.add(to_model(account))
+            return
+
+        model.full_name = account.full_name
+        model.document = account.document
+        model.email = account.email
+        model.password_hash = account.password_hash
+        model.account_type = account.account_type
+        model.balance = account.balance
