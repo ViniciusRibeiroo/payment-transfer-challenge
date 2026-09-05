@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from payment_transfer.api.transfers import router as transfers_router
 from payment_transfer.infrastructure.database import initialize_database
 
 
@@ -16,6 +17,9 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+
+app.include_router(transfers_router)
 
 
 @app.get("/health")
