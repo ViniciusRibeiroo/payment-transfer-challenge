@@ -7,6 +7,12 @@ from payment_transfer.application.transfers.transfer_money import TransferMoney
 from payment_transfer.domain.accounts.account import Account
 from payment_transfer.domain.accounts.account_type import AccountType
 
+class FakeTransferAuthorizer:
+    def __init__(self, authorized: bool = True) -> None:
+        self.authorized = authorized
+
+    def authorize(self, transfer) -> bool:
+        return self.authorized
 
 class FakeAccountRepository:
     def __init__(self, accounts: list[Account] | None = None) -> None:
@@ -59,7 +65,12 @@ def test_should_transfer_money_between_accounts():
     payee = create_account(balance=Decimal("50.00"))
 
     repository = FakeAccountRepository([payer, payee])
-    use_case = TransferMoney(repository)
+    authorizer = FakeTransferAuthorizer()
+
+    use_case = TransferMoney(
+        repository,
+        authorizer,
+    )
 
     transfer = use_case.execute(
         payer_id=payer.id,
@@ -79,7 +90,12 @@ def test_should_reject_transfer_when_payer_does_not_exist():
     payee = create_account()
 
     repository = FakeAccountRepository([payee])
-    use_case = TransferMoney(repository)
+    authorizer = FakeTransferAuthorizer()
+
+    use_case = TransferMoney(
+        repository,
+        authorizer,
+    )
 
     with pytest.raises(ValueError, match="Payer not found."):
         use_case.execute(
@@ -93,7 +109,12 @@ def test_should_reject_transfer_when_payee_does_not_exist():
     payer = create_account()
 
     repository = FakeAccountRepository([payer])
-    use_case = TransferMoney(repository)
+    authorizer = FakeTransferAuthorizer()
+
+    use_case = TransferMoney(
+        repository,
+        authorizer,
+    )
 
     with pytest.raises(ValueError, match="Payee not found."):
         use_case.execute(
@@ -111,7 +132,12 @@ def test_should_reject_transfer_from_merchant():
     payee = create_account()
 
     repository = FakeAccountRepository([payer, payee])
-    use_case = TransferMoney(repository)
+    authorizer = FakeTransferAuthorizer()
+
+    use_case = TransferMoney(
+        repository,
+        authorizer,
+    )
 
     with pytest.raises(
         ValueError,
@@ -129,7 +155,12 @@ def test_should_reject_transfer_with_insufficient_balance():
     payee = create_account()
 
     repository = FakeAccountRepository([payer, payee])
-    use_case = TransferMoney(repository)
+    authorizer = FakeTransferAuthorizer()
+
+    use_case = TransferMoney(
+        repository,
+        authorizer,
+    )
 
     with pytest.raises(ValueError, match="Insufficient balance."):
         use_case.execute(
@@ -146,7 +177,12 @@ def test_should_reject_transfer_to_same_account():
     payer = create_account()
 
     repository = FakeAccountRepository([payer])
-    use_case = TransferMoney(repository)
+    authorizer = FakeTransferAuthorizer()
+
+    use_case = TransferMoney(
+        repository,
+        authorizer,
+    )
 
     with pytest.raises(
         ValueError,
@@ -157,3 +193,28 @@ def test_should_reject_transfer_to_same_account():
             payee_id=payer.id,
             amount=Decimal("30.00"),
         )
+
+def test_should_reject_transfer_when_not_authorized():
+    payer = create_account(balance=Decimal("100.00"))
+    payee = create_account(balance=Decimal("50.00"))
+
+    repository = FakeAccountRepository([payer, payee])
+    authorizer = FakeTransferAuthorizer(authorized=False)
+
+    use_case = TransferMoney(
+        repository,
+        authorizer,
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="Transfer was not authorized.",
+    ):
+        use_case.execute(
+            payer_id=payer.id,
+            payee_id=payee.id,
+            amount=Decimal("30.00"),
+        )
+
+    assert payer.balance == Decimal("100.00")
+    assert payee.balance == Decimal("50.00")

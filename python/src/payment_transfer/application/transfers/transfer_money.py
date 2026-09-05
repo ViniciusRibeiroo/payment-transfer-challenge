@@ -6,14 +6,18 @@ from payment_transfer.application.accounts.account_repository import (
 )
 from payment_transfer.domain.accounts.account_type import AccountType
 from payment_transfer.domain.transfers.transfer import Transfer
-
+from payment_transfer.application.transfers.transfer_authorizer import (
+    TransferAuthorizer,
+)
 
 class TransferMoney:
     def __init__(
         self,
         account_repository: AccountRepository,
+        transfer_authorizer: TransferAuthorizer,
     ) -> None:
         self._account_repository = account_repository
+        self._transfer_authorizer = transfer_authorizer
 
     def execute(
         self,
@@ -39,6 +43,9 @@ class TransferMoney:
             payee_id=payee_id,
             amount=amount,
         )
+
+        if not self._transfer_authorizer.authorize(transfer):
+            raise ValueError("Transfer was not authorized.")
 
         payer.debit(amount)
         payee.credit(amount)
