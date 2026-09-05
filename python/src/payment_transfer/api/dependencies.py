@@ -16,6 +16,9 @@ from payment_transfer.infrastructure.database.session import SessionLocal
 from payment_transfer.infrastructure.integrations.authorization.devi_tools_transfer_authorizer import (
     DeviToolsTransferAuthorizer,
 )
+from payment_transfer.infrastructure.database.sqlalchemy_unit_of_work import (
+    SqlAlchemyUnitOfWork,
+)
 
 
 def get_session():
@@ -55,4 +58,15 @@ def get_transfer_money(
     return TransferMoney(
         account_repository=account_repository,
         transfer_authorizer=transfer_authorizer,
+    )
+
+def get_transfer_money(
+    account_repository: AccountRepository = Depends(get_account_repository),
+    transfer_authorizer: TransferAuthorizer = Depends(get_transfer_authorizer),
+    session: Session = Depends(get_session),
+) -> TransferMoney:
+    return TransferMoney(
+        account_repository=account_repository,
+        transfer_authorizer=transfer_authorizer,
+        unit_of_work=SqlAlchemyUnitOfWork(session),
     )
