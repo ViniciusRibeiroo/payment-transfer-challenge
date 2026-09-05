@@ -91,3 +91,53 @@ def test_should_reject_negative_balance():
         create_account(
             balance=Decimal("-0.01"),
         )
+
+def test_should_debit_account_balance():
+    account = create_account(balance=Decimal("100.00"))
+
+    account.debit(Decimal("30.00"))
+
+    assert account.balance == Decimal("70.00")
+
+
+def test_should_reject_debit_when_balance_is_insufficient():
+    account = create_account(balance=Decimal("50.00"))
+
+    with pytest.raises(ValueError, match="Insufficient balance."):
+        account.debit(Decimal("100.00"))
+
+
+def test_should_reject_zero_debit():
+    account = create_account(balance=Decimal("100.00"))
+
+    with pytest.raises(ValueError, match="Debit amount must be greater than zero."):
+        account.debit(Decimal("0.00"))
+
+
+def test_should_reject_negative_debit():
+    account = create_account(balance=Decimal("100.00"))
+
+    with pytest.raises(ValueError, match="Debit amount must be greater than zero."):
+        account.debit(Decimal("-10.00"))
+
+
+def test_should_credit_account_balance():
+    account = create_account(balance=Decimal("100.00"))
+
+    account.credit(Decimal("30.00"))
+
+    assert account.balance == Decimal("130.00")
+
+
+def test_should_reject_zero_credit():
+    account = create_account(balance=Decimal("100.00"))
+
+    with pytest.raises(ValueError, match="Credit amount must be greater than zero."):
+        account.credit(Decimal("0.00"))
+
+
+def test_should_reject_negative_credit():
+    account = create_account(balance=Decimal("100.00"))
+
+    with pytest.raises(ValueError, match="Credit amount must be greater than zero."):
+        account.credit(Decimal("-10.00"))

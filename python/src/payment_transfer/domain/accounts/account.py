@@ -40,3 +40,18 @@ class Account:
 
         if self.balance < Decimal("0.00"):
             raise ValueError("Balance cannot be negative.")
+
+    def debit(self, amount: Decimal) -> None:
+        if amount <= Decimal("0.00"):
+            raise ValueError("Debit amount must be greater than zero.")
+
+        if amount > self.balance:
+            raise ValueError("Insufficient balance.")
+
+        self.balance -= amount
+
+    def credit(self, amount: Decimal) -> None:
+        if amount <= Decimal("0.00"):
+            raise ValueError("Credit amount must be greater than zero.")
+
+        self.balance += amount
